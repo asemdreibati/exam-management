@@ -30,6 +30,26 @@ class DistributionRulesTest extends TestCase
         $this->assertSame(['B'], $this->coursesOf($scenario, $result->roomHeads, 'doctor'));
     }
 
+    public function test_member_who_objects_to_one_overlapping_course_is_kept_out_of_the_whole_sitting(): void
+    {
+        // A and B overlap, so they share one same-time node in the graph.
+        $scenario = (new DistributionScenario())
+            ->course('A', '2024-01-10', '09:00:00', ['R1'], '2:00')
+            ->course('B', '2024-01-10', '10:00:00', ['R2'])
+            ->member('H1', 2, DistributionScenario::ROOM_HEAD)
+            ->objects('H1', 'A')
+            ->member('H2', 2, DistributionScenario::ROOM_HEAD)
+            ->member('S1', 2, DistributionScenario::SECRETARY)
+            ->member('S2', 2, DistributionScenario::SECRETARY)
+            ->member('O1', 2)
+            ->member('O2', 2);
+
+        $result = $this->distribute($scenario);
+
+        $this->assertSame([], $this->coursesOf($scenario, $result->roomHeads, 'H1'));
+        $this->assertCount(1, $this->coursesOf($scenario, $result->roomHeads, 'H2'));
+    }
+
     private function distribute(DistributionScenario $scenario): DistributionResult
     {
         return app(MembersDistributor::class)->distribute($scenario->build());

@@ -217,14 +217,23 @@ class Graph extends Controller
         }
     }
 
-    public function setUsersWithSameTimeNodes(){//link users node with courses that have not objections of them in latest rotation
-        foreach ($this->arr_keys_users_objections_orderd as $user_id) {
-            $key_user=$this->getKeyFromArray($user_id,$this->arr_keys_users_objections_orderd);
-            foreach ($this->arr_keys_courses_num_objections_orderd as $course_id) {
-                $key_course=$this->getKeyFromArray($course_id,$this->arr_keys_courses_num_objections_orderd);
-                if(!in_array($course_id,$this->arr_users_objetions_orderd[$user_id]))
-                    $this->arr_graph[$key_user+1][$this->members->getLength()+$this->arr_same_time_courses[$key_course]+1]=1;
-            }
+    /**
+     * Link each user to the same-time nodes they are available for.
+     *
+     * Flow from a same-time node can reach any course in it, so a user who
+     * objects to (or teaches) one course of a same-time group is kept out of
+     * the whole group; otherwise they could be routed into that course.
+     */
+    public function setUsersWithSameTimeNodes(){
+        foreach ($this->arr_keys_users_objections_orderd as $key_user => $user_id) {
+            $blocked_same_times=[];
+            foreach ($this->arr_keys_courses_num_objections_orderd as $key_course => $course_id)
+                if(in_array($course_id,$this->arr_users_objetions_orderd[$user_id]))
+                    $blocked_same_times[$this->arr_same_time_courses[$key_course]]=true;
+
+            foreach (array_unique($this->arr_same_time_courses) as $same_time_index)
+                if(!isset($blocked_same_times[$same_time_index]))
+                    $this->arr_graph[$key_user+1][$this->members->getLength()+$same_time_index+1]=1;
         }
     }
     public function coursesWithArrDateAndTime(){
