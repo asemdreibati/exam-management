@@ -10,7 +10,7 @@ use App\Models\Rotation;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\MaxMinRoomsCapacity\Stock;
 use App\Http\Controllers\MaxFlow\Graph;
 use Illuminate\Support\LazyCollection;
@@ -19,6 +19,26 @@ use PhpOffice\PhpSpreadsheet\Helper\Size;
 //use Illuminate\Support\Facades\Request;
 class UsersController extends Controller
 {
+    /**
+     * Fields any user may change on their own account.
+     */
+    private const SELF_EDITABLE_FIELDS = ['email', 'username'];
+
+    /**
+     * Fields only admins may set. `property` is mapped separately and
+     * `password` is handled explicitly, so neither is listed here.
+     */
+    private const ADMIN_EDITABLE_FIELDS = [
+        'email',
+        'username',
+        'role',
+        'temporary_role',
+        'faculty_id',
+        'department_id',
+        'number_of_observation',
+        'city',
+    ];
+
     public function search(Request $request)
     {
         $se = $request->se;
@@ -99,19 +119,12 @@ class UsersController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(StoreUserRequest $request)
-    {//dd($request->secure());
-        //dd($request->getRequestUri());
-        $property='';
-        if($request->property==='1')
-            $property="عضو هيئة فنية";
-        elseif($request->property==='2')
-            $property="عضو هيئة تدريسية";
-        $custom_arr=array_merge($request->except('property'),['property'=>$property]);
-        $user = User::create(
-            // you also can be to write this User::create($request->validated()); but go to StoreUserRequest and make all fields required
-            $custom_arr
-        );
-        //return Response::json($user);
+    {
+        User::create(array_merge(
+            $request->only(array_merge(self::ADMIN_EDITABLE_FIELDS, ['password'])),
+            ['property' => $this->propertyLabel($request->property)]
+        ));
+
         return redirect()->route('users.index')
             ->withSuccess(__('User created successfully.'));
     }
@@ -185,32 +198,28 @@ class UsersController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(User $user, UpdateUserRequest $request)
-    {   //dd(bcrypt($request['old_password'])==$user->password);
-        //dd( $request);
-
-        //dd(Auth::attempt(['email'=>$user->email,'password'=>$request['old_password']]), $request['new_password'] , $request['new_password_verification']);
-        if($request['old_password'] && $request['new_password'] && $request['new_password_verification']){
-            if(Auth::attempt(['email'=>$user->email,'password'=>$request['old_password']])){
-                if($request['new_password'] == $request['new_password_verification']){
-                    $user->update(['password' => $request['new_password']]);
-                }else{
+    {
+        if ($request->filled(['old_password', 'new_password', 'new_password_verification'])
+            && $request->user()->is($user)) {
+            if (!Hash::check($request->old_password, $user->password)) {
                 return redirect()->back()
-                ->withDanger(__('incorrect verification password.'));
-                }
-            }else{
-                return redirect()->back()
-                ->withDanger(__('incorrect old password.'));
+                    ->withDanger(__('incorrect old password.'));
             }
+            if ($request->new_password !== $request->new_password_verification) {
+                return redirect()->back()
+                    ->withDanger(__('incorrect verification password.'));
+            }
+            $user->password = $request->new_password;
         }
 
-        $property='';
-        if($request->property==='1')
-            $property="عضو هيئة فنية";
-        elseif($request->property==='2')
-            $property="عضو هيئة تدريسية";
-        $custom_arr=array_merge($request->except('property'),['property'=>$property]);
-        $user->update($custom_arr);
-        //$user->syncRoles($request->get('role'));
+        $user->fill($request->only(self::SELF_EDITABLE_FIELDS));
+
+        if ($request->user()->isAdmin()) {
+            $user->fill($request->only(self::ADMIN_EDITABLE_FIELDS));
+            $user->property = $this->propertyLabel($request->property);
+        }
+
+        $user->save();
 
         return redirect()->route('users.index')
         ->withSuccess(__('User updated successfully.'));
@@ -305,6 +314,21 @@ class UsersController extends Controller
     }
 
 
+
+    /**
+     * Map the property option submitted by the user forms to its label.
+     */
+    private function propertyLabel(?string $option): string
+    {
+        switch ($option) {
+            case '1':
+                return 'عضو هيئة فنية';
+            case '2':
+                return 'عضو هيئة تدريسية';
+            default:
+                return '';
+        }
+    }
 
     public function setObservations(Request $request){
         $all_roles = array_unique(User::pluck('role')->all());
