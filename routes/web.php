@@ -39,22 +39,28 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
              */
             Route::group(['prefix' => 'users'], function() {
                 Route::get('/', 'UsersController@index')->name('users.index');
-                Route::get('/create', 'UsersController@create')->name('users.create');
-                Route::post('/create', 'UsersController@store')->name('users.store');
                 Route::get('/{user}/show', 'UsersController@show')->name('users.show');
-                Route::get('/{user}/observations', 'UsersController@observations')->name('users.observations');            
-                Route::get('/{user}/edit', 'UsersController@edit')->name('users.edit');
-                Route::patch('/{user}/update', 'UsersController@update')->name('users.update');
-                Route::delete('/{user}/delete', 'UsersController@destroy')->name('users.destroy');
-                Route::patch('/{user}/isActive', 'UsersController@isActive')->name('users.isActive');
+                Route::get('/{user}/observations', 'UsersController@observations')->name('users.observations');
                 Route::get('/{user}/profile', 'UsersController@profile')->name('users.profile');
-                Route::get('/{user}/create_user_courses', 'UsersController@create_user_courses')->name('users.create_user_courses');
-                Route::post('/{user}/store_user_courses', 'UsersController@store_user_courses')->name('users.store_user_courses');
-                Route::get('/{user}/edit_user_courses', 'UsersController@edit_user_courses')->name('users.edit_user_courses');
-                Route::patch('/{user}/update_user_courses', 'UsersController@update_user_courses')->name('users.update_user_courses');
-                Route::delete('/{user}/courses_teach/{course}/destroy_user_courses', 'UsersController@destroy_user_courses')->name('users.destroy_user_courses');
 
-                Route::patch('/setObservations', 'UsersController@setObservations')->name('users.setObservations');
+                // A user may edit their own account; admins may edit any account.
+                Route::group(['middleware' => 'adminAccess'], function() {
+                    Route::get('/{user}/edit', 'UsersController@edit')->name('users.edit');
+                    Route::patch('/{user}/update', 'UsersController@update')->name('users.update');
+                });
+
+                Route::group(['middleware' => 'adminOnly'], function() {
+                    Route::get('/create', 'UsersController@create')->name('users.create');
+                    Route::post('/create', 'UsersController@store')->name('users.store');
+                    Route::delete('/{user}/delete', 'UsersController@destroy')->name('users.destroy');
+                    Route::patch('/{user}/isActive', 'UsersController@isActive')->name('users.isActive');
+                    Route::get('/{user}/create_user_courses', 'UsersController@create_user_courses')->name('users.create_user_courses');
+                    Route::post('/{user}/store_user_courses', 'UsersController@store_user_courses')->name('users.store_user_courses');
+                    Route::get('/{user}/edit_user_courses', 'UsersController@edit_user_courses')->name('users.edit_user_courses');
+                    Route::patch('/{user}/update_user_courses', 'UsersController@update_user_courses')->name('users.update_user_courses');
+                    Route::delete('/{user}/courses_teach/{course}/destroy_user_courses', 'UsersController@destroy_user_courses')->name('users.destroy_user_courses');
+                    Route::patch('/setObservations', 'UsersController@setObservations')->name('users.setObservations');
+                });
 
                 Route::get('/search', 'UsersController@search')->name('users.search');
 
@@ -117,10 +123,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
                 //Rotation ExamProgram
                 //Rotation Objections
-                Route::get('/{rotation}/user/{user}/objections/create', 'CourseRotationUser_ObjectionController@create')->name('rotations.objections.create');
-                Route::post('/{rotation}/user/{user}/objections/create', 'CourseRotationUser_ObjectionController@store')->name('rotations.objections.store');
-                Route::get('/{rotation}/user/{user}/objections/edit', 'CourseRotationUser_ObjectionController@edit')->name('rotations.objections.edit');
-                Route::patch('/{rotation}/user/{user}/objections/update', 'CourseRotationUser_ObjectionController@update')->name('rotations.objections.update');
+                Route::get('/{rotation}/user/{user}/objections/create', 'CourseRotationUser_ObjectionController@create')->name('rotations.objections.create')->middleware('adminAccess');
+                Route::post('/{rotation}/user/{user}/objections/create', 'CourseRotationUser_ObjectionController@store')->name('rotations.objections.store')->middleware('adminAccess');
+                Route::get('/{rotation}/user/{user}/objections/edit', 'CourseRotationUser_ObjectionController@edit')->name('rotations.objections.edit')->middleware('adminAccess');
+                Route::patch('/{rotation}/user/{user}/objections/update', 'CourseRotationUser_ObjectionController@update')->name('rotations.objections.update')->middleware('adminAccess');
                 //Rotation Objections
                 //Distribute Students && Members of Faculty
                 Route::post('/{rotation}/distributeStudents', 'RotationsController@distributeStudents')->name('rotations.distributeStudents')->middleware('adminAccess');
