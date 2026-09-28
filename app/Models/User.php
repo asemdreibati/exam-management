@@ -80,6 +80,19 @@ class User extends Authenticatable
         $this->attributes['password'] = bcrypt($value);
     }
 
+    /**
+     * Temporary roles that grant administrative access.
+     */
+    public const ADMIN_TEMPORARY_ROLES = [
+        'رئيس شعبة الامتحانات',
+        'عميد',
+    ];
+
+    public function isAdmin(): bool
+    {
+        return in_array($this->temporary_role, self::ADMIN_TEMPORARY_ROLES, true);
+    }
+
     public function teaches(){
         return $this->belongsToMany('App\Models\Course','course_teacher')->withPivot('course_id','user_id','section_type');
     }
