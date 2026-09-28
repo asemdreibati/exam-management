@@ -22,6 +22,20 @@ class MaxFlow extends Controller
     private array $observers_taken;
     public static int $count_of_paths=0;
     //=====================  Asem  =====================
+
+    /**
+     * Reset the static state carried between runs. Each distribution
+     * request must start from these values, as in a fresh PHP process.
+     */
+    public static function resetState(): void
+    {
+        self::$previous_user = 0;
+        self::$current_user = 0;
+        self::$count = 0;
+        self::$science_room_visited = false;
+        self::$count_of_paths = 0;
+    }
+
     public function __construct(int $length_graph,$members,$courses,$count_arr_same_time_courses , $rooms){
         Self::$V = $length_graph;
         $this->members=$members;

@@ -9,8 +9,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\MaxMinRoomsCapacity\Stock;
-use App\Http\Controllers\MaxFlow\Graph;
 use App\Http\Controllers\MaxFlow\EnumPersonType;
+use App\Services\Distribution\MembersDistributor;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ObservationsExport;
@@ -135,41 +135,24 @@ private function saveDistribution(Rotation $rotation, array $paths_info_room_hea
     }
 }
 
-public function distributeMembersOfFaculty(Rotation $rotation){
+public function distributeMembersOfFaculty(Rotation $rotation, MembersDistributor $distributor){
 
     ini_set('max_execution_time', 360); //6 minutes
-    $graph_room_heads=new Graph(EnumPersonType::RoomHead, $rotation);
-    list($paths_room_heads,$paths_info_room_heads)=$graph_room_heads->applyMaxFlowAlgorithm();//dd($paths_room_heads,$paths_info_room_heads,$paths_info_room_heads['users_observations']);
-    //dd("stop");
-    //dd($paths_room_heads,$paths_info_room_heads);
-    if(count($paths_room_heads)){
-        //dump("_____________________");
-        $graph_secertaries=new Graph(EnumPersonType::Secertary, $rotation, $paths_info_room_heads);//dd("Alignment");
-        list($paths_secertaries,$paths_info_secertaries)=$graph_secertaries->applyMaxFlowAlgorithm();
-        //dd($paths_secertaries,$paths_info_secertaries);
-        //dd("stop");
+    $result = $distributor->distribute($rotation);
 
-        if(count($paths_secertaries)){
-            //dump("_____________________");
-
-            $graph_observers=new Graph(EnumPersonType::Observer, $rotation, $paths_info_room_heads, $paths_info_secertaries);
-            list($paths_observers,$paths_info_observers)=$graph_observers->applyMaxFlowAlgorithm();
-            //dd($paths_room_heads,$paths_info_room_heads,$paths_secertaries,$paths_info_secertaries,$paths_observers,$paths_info_observers);
-            //dd("stop");
-            if(count($paths_observers)){
-                DB::transaction(function () use ($rotation, $paths_info_room_heads, $paths_info_secertaries, $paths_info_observers) {
-                    $this->saveDistribution($rotation, $paths_info_room_heads, $paths_info_secertaries, $paths_info_observers);
-                });
-            }else{
-                return redirect()->back()->withWarning(__('لا يوجد مراقبين كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة مراقبين '));
-            }
-        }else{
-            return redirect()->back()->withWarning(__('لا يوجد امناء سر كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة أمناء سر جدد '));
-        }
-    }else{
-        return redirect()->back()->withWarning(__('لا يوجد رؤساء قاعات كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة رؤساء قاعات جدد '));
+    if (!$result->succeeded()) {
+        $warnings = [
+            EnumPersonType::RoomHead->name => 'لا يوجد رؤساء قاعات كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة رؤساء قاعات جدد ',
+            EnumPersonType::Secertary->name => 'لا يوجد امناء سر كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة أمناء سر جدد ',
+            EnumPersonType::Observer->name => 'لا يوجد مراقبين كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة مراقبين ',
+        ];
+        return redirect()->back()->withWarning(__($warnings[$result->unfilledRole->name]));
     }
-    //dd("allli");
+
+    DB::transaction(function () use ($rotation, $result) {
+        $this->saveDistribution($rotation, $result->roomHeads, $result->secretaries, $result->observers);
+    });
+
     return redirect("/rotations/$rotation->id/show")
     ->withSuccess(__('You have successfully distribute all Members to the sutable rooms'));
 }
