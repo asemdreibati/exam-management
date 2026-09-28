@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Pagination\Paginator;
-use App\Services\Distribution\LegacyMaxFlowMembersDistributor;
+use App\Services\Distribution\MaxFlowMembersDistributor;
 use App\Services\Distribution\MembersDistributor;
 use Illuminate\Support\ServiceProvider;
 //use Illuminate\Support\Facades\URL;
@@ -17,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(MembersDistributor::class, LegacyMaxFlowMembersDistributor::class);
+        $this->app->bind(MembersDistributor::class, MaxFlowMembersDistributor::class);
     }
 
     /**
