@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\MaxMinRoomsCapacity\Stock;
 use App\Http\Controllers\MaxFlow\EnumPersonType;
-use App\Services\Distribution\LegacyDistributionWriter;
+use App\Services\Distribution\DistributionWriter;
 use App\Services\Distribution\MembersDistributor;
 
 use Maatwebsite\Excel\Facades\Excel;
@@ -78,9 +78,7 @@ class rotationsController extends Controller
 public function current_user_observations($user){
     return $user->id;
 }
-public function distributeMembersOfFaculty(Rotation $rotation, MembersDistributor $distributor, LegacyDistributionWriter $writer){
-
-    ini_set('max_execution_time', 360); //6 minutes
+public function distributeMembersOfFaculty(Rotation $rotation, MembersDistributor $distributor, DistributionWriter $writer){
     $result = $distributor->distribute($rotation);
 
     if (!$result->succeeded()) {
