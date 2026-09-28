@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Distribution;
 
+use App\Http\Controllers\MaxFlow\EnumPersonType;
+use App\Http\Controllers\MaxFlow\Graph;
 use App\Services\Distribution\DistributionResult;
 use App\Services\Distribution\MembersDistributor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -48,6 +50,24 @@ class DistributionRulesTest extends TestCase
 
         $this->assertSame([], $this->coursesOf($scenario, $result->roomHeads, 'H1'));
         $this->assertCount(1, $this->coursesOf($scenario, $result->roomHeads, 'H2'));
+    }
+
+    public function test_exam_overlapping_a_non_adjacent_exam_shares_its_same_time_group(): void
+    {
+        // Sorted by start: A (09:00-12:00), B (09:00-09:30), C (10:00-11:30).
+        // C does not overlap B, the exam before it, but it does overlap A.
+        $rotation = (new DistributionScenario())
+            ->course('A', '2024-01-10', '09:00:00', ['R1'], '3:00')
+            ->course('B', '2024-01-10', '09:00:00', ['R2'], '0:30')
+            ->course('C', '2024-01-10', '10:00:00', ['R3'])
+            ->course('D', '2024-01-10', '12:00:00', ['R4'])
+            ->member('H1', 4, DistributionScenario::ROOM_HEAD)
+            ->build();
+
+        [, $groupCount] = (new Graph(EnumPersonType::RoomHead, $rotation))->coursesInSameTimes();
+
+        // {A, B, C} and {D}; D starts exactly when A ends.
+        $this->assertSame(2, $groupCount);
     }
 
     private function distribute(DistributionScenario $scenario): DistributionResult

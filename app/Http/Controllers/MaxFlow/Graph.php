@@ -246,32 +246,46 @@ class Graph extends Controller
         }
         return $arr_courses_idx_date_time;
     }
-    public function coursesInSameTimes(){//this method rely the courses that orderd via date`$this->courses->getCourses()` with the the courses that orderd via objections array `$this->arr_keys_courses_num_objections_orderd` that orderd via objections,each index in this array that is returned from this method correspond to the index in the array `$this->arr_keys_courses_num_objections_orderd`
-        $same_times=$this->arr_keys_courses_num_objections_orderd;
-        $same_times[$this->getKeyFromArray($this->courses->getCourses()[0],$this->arr_keys_courses_num_objections_orderd)]=$counter=0;
-        for ($i=1; $i < $this->courses->getLength() ; $i++) {
-            $curr_date=$this->arr_courses_idx_date_time[$i]['date'];
-            $curr_time=$this->arr_courses_idx_date_time[$i]['time'];
-            $curr_duration=$this->arr_courses_idx_date_time[$i]['duration'];
+    /**
+     * Group the courses into same-time nodes: courses on the same date whose
+     * exam times overlap, directly or through a chain of overlapping exams.
+     *
+     * Returns [same-time index per course (keyed like
+     * $this->arr_keys_courses_num_objections_orderd), number of groups].
+     */
+    public function coursesInSameTimes(){
+        $same_times=[];
+        $counter=-1;
+        $group_date=null;
+        $group_end=0;
+        foreach ($this->courses->getCourses() as $i => $course_id) {//ordered by date then time
+            $sitting=$this->arr_courses_idx_date_time[$i];
+            $start=$this->minutesSinceMidnight($sitting['time']);
+            $end=$start+$this->minutesSinceMidnight($sitting['duration']);
 
-            $pre_date=$this->arr_courses_idx_date_time[$i-1]['date'];
-            $pre_time=$this->arr_courses_idx_date_time[$i-1]['time'];
-            $pre_duration=$this->arr_courses_idx_date_time[$i-1]['duration'];
-
-            if($pre_date==$curr_date &&
-                (
-                    ($pre_time == $curr_time) || ( strtotime($pre_time) > strtotime($curr_time) && $pre_time < gmdate('H:i:s',strtotime($curr_time)+strtotime($curr_duration)) ) ||
-                    ( strtotime($pre_time) < strtotime($curr_time) && $curr_time < gmdate('H:i:s',strtotime($pre_time)+strtotime($pre_duration)) )
-                )
-             ){
-                $same_times[$this->getKeyFromArray($this->courses->getCourses()[$i],$this->arr_keys_courses_num_objections_orderd)]=$same_times[$this->getKeyFromArray($this->courses->getCourses()[$i-1],$this->arr_keys_courses_num_objections_orderd)];
-                continue;
+            if($sitting['date'] !== $group_date || $start >= $group_end){
+                $counter++;
+                $group_date=$sitting['date'];
+                $group_end=$end;
+            }else{
+                $group_end=max($group_end,$end);
             }
-            $same_times[$this->getKeyFromArray($this->courses->getCourses()[$i],$this->arr_keys_courses_num_objections_orderd)]=++$counter;
+            $same_times[$this->getKeyFromArray($course_id,$this->arr_keys_courses_num_objections_orderd)]=$counter;
         }
-        $num_distict_times=count(array_unique($same_times));//$same_times[count($same_times)-1]+1;
 
-        return array($same_times,$num_distict_times);
+        ksort($same_times);
+
+        return array($same_times,$counter+1);
+    }
+
+    /**
+     * Convert "H:i[:s]" (a time of day or a duration such as "1:30") to minutes.
+     */
+    private function minutesSinceMidnight(string $time): int
+    {
+        [$hours,$minutes]=array_map('intval',explode(':',$time));
+
+        return $hours*60+$minutes;
     }
 
     public function setSameTimeNodesToCourses(){
