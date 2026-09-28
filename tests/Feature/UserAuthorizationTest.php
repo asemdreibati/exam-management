@@ -110,6 +110,16 @@ class UserAuthorizationTest extends TestCase
         $this->assertNotNull($user->fresh());
     }
 
+    public function test_admin_can_delete_users(): void
+    {
+        $user = $this->makeUser();
+
+        $this->actingAs($this->makeAdmin())->delete(route('users.destroy', $user))
+            ->assertRedirect(route('users.index'));
+
+        $this->assertNull($user->fresh());
+    }
+
     public function test_non_admin_cannot_manage_accounts_or_observation_counts(): void
     {
         $user = $this->makeUser();
