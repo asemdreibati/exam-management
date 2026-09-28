@@ -12,9 +12,9 @@
                 @endphp
                  @if($observations_number_in_latest_rotation)
                     @if(!count($num_of_my_courses_objections))
-                        <a href="{{ route('rotations.objections.create',\App\Models\Rotation::latest()->first()->id) }}" class="btn btn-danger">إنشاء إعتراضات</a>
+                        <a href="{{ route('rotations.objections.create',[\App\Models\Rotation::latest()->first()->id, Auth::user()->id]) }}" class="btn btn-danger">إنشاء إعتراضات</a>
                     @else
-                        <a href="{{ route('rotations.objections.edit',\App\Models\Rotation::latest()->first()->id) }}" class="btn btn-danger">تعديل إعتراضاتي</a>
+                        <a href="{{ route('rotations.objections.edit',[\App\Models\Rotation::latest()->first()->id, Auth::user()->id]) }}" class="btn btn-danger">تعديل إعتراضاتي</a>
                     @endif
                     @endif
             </h1>
