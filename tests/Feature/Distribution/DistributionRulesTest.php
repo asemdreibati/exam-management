@@ -2,22 +2,34 @@
 
 namespace Tests\Feature\Distribution;
 
-use App\Http\Controllers\MaxFlow\EnumPersonType;
-use App\Http\Controllers\MaxFlow\Graph;
 use App\Services\Distribution\DistributionResult;
+use App\Services\Distribution\LegacyMaxFlowMembersDistributor;
+use App\Services\Distribution\MaxFlowMembersDistributor;
 use App\Services\Distribution\MembersDistributor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\DistributionScenario;
 use Tests\TestCase;
 
 /**
- * Hand-built scenarios for individual distribution rules.
+ * Hand-built scenarios for individual distribution rules, run against
+ * every engine.
  */
 class DistributionRulesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_doctor_is_not_assigned_to_a_course_they_teach(): void
+    public function engines(): array
+    {
+        return [
+            'legacy' => [LegacyMaxFlowMembersDistributor::class],
+            'optimized' => [MaxFlowMembersDistributor::class],
+        ];
+    }
+
+    /**
+     * @dataProvider engines
+     */
+    public function test_doctor_is_not_assigned_to_a_course_they_teach(string $engine): void
     {
         $scenario = (new DistributionScenario())
             ->course('A', '2024-01-10', '09:00:00', ['R1'])
@@ -27,12 +39,15 @@ class DistributionRulesTest extends TestCase
             ->member('S1', 2, DistributionScenario::SECRETARY)
             ->member('O1', 2);
 
-        $result = $this->distribute($scenario);
+        $result = $this->distribute($engine, $scenario);
 
         $this->assertSame(['B'], $this->coursesOf($scenario, $result->roomHeads, 'doctor'));
     }
 
-    public function test_member_who_objects_to_one_overlapping_course_is_kept_out_of_the_whole_sitting(): void
+    /**
+     * @dataProvider engines
+     */
+    public function test_member_who_objects_to_one_overlapping_course_is_kept_out_of_the_whole_sitting(string $engine): void
     {
         // A and B overlap, so they share one same-time node in the graph.
         $scenario = (new DistributionScenario())
@@ -46,33 +61,38 @@ class DistributionRulesTest extends TestCase
             ->member('O1', 2)
             ->member('O2', 2);
 
-        $result = $this->distribute($scenario);
+        $result = $this->distribute($engine, $scenario);
 
         $this->assertSame([], $this->coursesOf($scenario, $result->roomHeads, 'H1'));
         $this->assertCount(1, $this->coursesOf($scenario, $result->roomHeads, 'H2'));
     }
 
-    public function test_exam_overlapping_a_non_adjacent_exam_shares_its_same_time_group(): void
+    /**
+     * @dataProvider engines
+     */
+    public function test_member_is_not_assigned_to_exams_overlapping_through_a_non_adjacent_exam(string $engine): void
     {
         // Sorted by start: A (09:00-12:00), B (09:00-09:30), C (10:00-11:30).
         // C does not overlap B, the exam before it, but it does overlap A.
-        $rotation = (new DistributionScenario())
+        $scenario = (new DistributionScenario())
             ->course('A', '2024-01-10', '09:00:00', ['R1'], '3:00')
             ->course('B', '2024-01-10', '09:00:00', ['R2'], '0:30')
             ->course('C', '2024-01-10', '10:00:00', ['R3'])
-            ->course('D', '2024-01-10', '12:00:00', ['R4'])
-            ->member('H1', 4, DistributionScenario::ROOM_HEAD)
-            ->build();
+            ->member('H1', 3, DistributionScenario::ROOM_HEAD)
+            ->member('S1', 3, DistributionScenario::SECRETARY)
+            ->member('O1', 3);
 
-        [, $groupCount] = (new Graph(EnumPersonType::RoomHead, $rotation))->coursesInSameTimes();
+        $result = $this->distribute($engine, $scenario);
 
-        // {A, B, C} and {D}; D starts exactly when A ends.
-        $this->assertSame(2, $groupCount);
+        $this->assertCount(1, $this->coursesOf($scenario, $result->roomHeads, 'H1'));
     }
 
-    private function distribute(DistributionScenario $scenario): DistributionResult
+    private function distribute(string $engine, DistributionScenario $scenario): DistributionResult
     {
-        return app(MembersDistributor::class)->distribute($scenario->build());
+        /** @var MembersDistributor $distributor */
+        $distributor = new $engine();
+
+        return $distributor->distribute($scenario->build());
     }
 
     /**
