@@ -188,7 +188,7 @@ class Graph extends Controller
                 }
             $users_courses_objections[$member_id]=$courses_user_objected;
         }
-        uasort($users_courses_objections,fn($a,$b)=>count($a)<count($b));//sort via the user that have max objections
+        uasort($users_courses_objections,fn($a,$b)=>count($b)<=>count($a));//sort via the user that have max objections
         return $users_courses_objections;
     }
     //2
@@ -201,7 +201,7 @@ class Graph extends Controller
                     $num++;
             $arr_keys_courses_num_objections_orderd[$course_id]=$num;
         }
-        uasort($arr_keys_courses_num_objections_orderd,fn($a,$b)=>$a<$b);//sort via the course that have max objections
+        uasort($arr_keys_courses_num_objections_orderd,fn($a,$b)=>$b<=>$a);//sort via the course that have max objections
 
         return $arr_keys_courses_num_objections_orderd;
     }
