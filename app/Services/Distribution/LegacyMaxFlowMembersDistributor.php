@@ -11,7 +11,7 @@ use App\Models\Rotation;
  * Runs the original max-flow algorithm once per role. Each later role's
  * graph is built with the earlier roles' assignments already removed.
  */
-final class MaxFlowMembersDistributor implements MembersDistributor
+final class LegacyMaxFlowMembersDistributor implements MembersDistributor
 {
     public function distribute(Rotation $rotation): DistributionResult
     {

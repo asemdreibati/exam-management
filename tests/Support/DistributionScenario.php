@@ -144,19 +144,43 @@ final class DistributionScenario
     }
 
     /**
+     * Ranges ([min, max]) used by random(). "large" matches the size of a
+     * real rotation: ~67 courses in ~660 course rooms, 28 rooms, 100+ role
+     * members and around a dozen objections per member.
+     */
+    private const SIZES = [
+        'small' => [
+            'rooms' => [5, 8], 'days' => [3, 5], 'courses' => [7, 12], 'roomsPerCourse' => [1, 3],
+            'heads' => [5, 8], 'secretaries' => [5, 8], 'both' => [1, 3], 'observers' => [8, 14],
+            'quota' => [2, 6], 'objections' => [0, 2],
+        ],
+        'tight' => [
+            'rooms' => [4, 6], 'days' => [2, 3], 'courses' => [8, 12], 'roomsPerCourse' => [1, 3],
+            'heads' => [3, 5], 'secretaries' => [3, 5], 'both' => [0, 1], 'observers' => [4, 7],
+            'quota' => [2, 5], 'objections' => [1, 4],
+        ],
+        'large' => [
+            'rooms' => [28, 28], 'days' => [14, 14], 'courses' => [67, 67], 'roomsPerCourse' => [6, 14],
+            'heads' => [40, 50], 'secretaries' => [40, 50], 'both' => [8, 12], 'observers' => [100, 120],
+            'quota' => [8, 14], 'objections' => [0, 6],
+        ],
+    ];
+
+    /**
      * A reproducible, realistically shaped random scenario: several exam
      * days with overlapping sittings, rooms shared by same-time courses,
      * mixed member pools, objections and teaching doctors.
      */
-    public static function random(int $seed): self
+    public static function random(int $seed, string $size = 'small'): self
     {
         mt_srand($seed);
         $scenario = new self();
+        $range = fn (string $key) => mt_rand(...self::SIZES[$size][$key]);
 
         $sittings = [['09:00:00', '1:30'], ['09:00:00', '2:00'], ['10:00:00', '1:30'], ['12:00:00', '2:00'], ['13:00:00', '1:30']];
-        $roomNames = array_map(fn ($i) => "R$i", range(1, mt_rand(5, 8)));
-        $days = mt_rand(3, 5);
-        $courseCount = mt_rand(7, 12);
+        $roomNames = array_map(fn ($i) => "R$i", range(1, $range('rooms')));
+        $days = $range('days');
+        $courseCount = $range('courses');
         $roomsBySitting = [];
 
         for ($c = 1; $c <= $courseCount; $c++) {
@@ -164,7 +188,7 @@ final class DistributionScenario
             [$time, $duration] = $sittings[mt_rand(0, count($sittings) - 1)];
             $sitting = "$date $time";
             $rooms = [];
-            for ($r = mt_rand(1, 3); $r > 0; $r--) {
+            for ($r = $range('roomsPerCourse'); $r > 0; $r--) {
                 // Mostly fresh rooms; sometimes share one with a course in the same sitting.
                 $shared = $roomsBySitting[$sitting] ?? [];
                 $rooms[] = ($shared && mt_rand(1, 5) === 1)
@@ -177,17 +201,17 @@ final class DistributionScenario
         }
 
         $pools = [
-            ['H', self::ROOM_HEAD, mt_rand(5, 8)],
-            ['S', self::SECRETARY, mt_rand(5, 8)],
-            ['B', self::ROOM_HEAD_AND_SECRETARY, mt_rand(1, 3)],
-            ['O', null, mt_rand(8, 14)],
+            ['H', self::ROOM_HEAD, $range('heads')],
+            ['S', self::SECRETARY, $range('secretaries')],
+            ['B', self::ROOM_HEAD_AND_SECRETARY, $range('both')],
+            ['O', null, $range('observers')],
         ];
         foreach ($pools as [$prefix, $options, $count]) {
             for ($m = 1; $m <= $count; $m++) {
                 $name = "$prefix$m";
                 $isDoctor = $prefix === 'H' && mt_rand(0, 1) === 1;
-                $scenario->member($name, mt_rand(2, 6), $options, $isDoctor ? 'دكتور' : 'موظف');
-                for ($o = mt_rand(0, 2); $o > 0; $o--) {
+                $scenario->member($name, $range('quota'), $options, $isDoctor ? 'دكتور' : 'موظف');
+                for ($o = $range('objections'); $o > 0; $o--) {
                     $scenario->objects($name, 'C' . mt_rand(1, $courseCount));
                 }
                 if ($isDoctor) {
