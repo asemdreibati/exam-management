@@ -119,14 +119,18 @@ class Members extends Controller
 
         return $num_observation_for_passed_member_id;
     }
-    public function geMemberWithTeachedSubjects($member_id) {//get the subjects that the member are teaching them
-        $user_subjects = [];
+    /**
+     * Ids of the courses a doctor teaches; empty for any other member.
+     *
+     * @return int[]
+     */
+    public function getCoursesTaughtBy($member_id): array
+    {
         $member = User::where('id',$member_id)->first();
-        if($member->role=="دكتور")
-            foreach ($member->teaches()->pluck('course_id') as $subject_id)
-                $user_subjects[$member_id][] = $subject_id;
+        if($member->role !== "دكتور")
+            return [];
 
-        return $user_subjects;
+        return $member->teaches()->pluck('course_id')->all();
     }
 
 }

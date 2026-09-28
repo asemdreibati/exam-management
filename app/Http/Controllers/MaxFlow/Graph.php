@@ -180,10 +180,8 @@ class Graph extends Controller
                     foreach ($member->coursesObjection()->wherePivot('rotation_id',$this->rotation->id)->toBase()->get() as $course)
                         array_push($courses_user_objected,$course->id);
 
-                    //get the subjects that the member are teaching them and append them to own objections
-                    if(count($user_subjects_ids=$this->members->geMemberWithTeachedSubjects($member_id))){
-                        $courses_user_objected=array_merge($courses_user_objected, $user_subjects_ids);
-                    }
+                    //a doctor must not observe the courses they teach, so treat them as objections
+                    $courses_user_objected=array_merge($courses_user_objected, $this->members->getCoursesTaughtBy($member_id));
                     $users_courses_objections[$member_id]=$courses_user_objected;
                 }
             $users_courses_objections[$member_id]=$courses_user_objected;
