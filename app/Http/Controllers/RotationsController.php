@@ -79,6 +79,10 @@ public function current_user_observations($user){
     return $user->id;
 }
 public function distributeMembersOfFaculty(Rotation $rotation, MembersDistributor $distributor, DistributionWriter $writer){
+    if ($rotation->users()->exists()) {
+        return redirect()->back()->withWarning(__('تم توزيع المراقبات في هذه الدورة مسبقاً، قم بتهيئة المراقبات أولاً ثم أعد التوزيع'));
+    }
+
     $result = $distributor->distribute($rotation);
 
     if (!$result->succeeded()) {

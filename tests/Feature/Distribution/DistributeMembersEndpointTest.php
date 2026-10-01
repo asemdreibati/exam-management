@@ -27,6 +27,22 @@ class DistributeMembersEndpointTest extends TestCase
         $this->assertGreaterThan(0, (clone $saved)->where('roleIn', 'Observer')->count());
     }
 
+    public function test_distributing_an_already_distributed_rotation_is_refused_without_changes(): void
+    {
+        $rotation = DistributionScenario::random(1)->build();
+        $admin = User::factory()->admin()->create(['faculty_id' => $rotation->faculty_id]);
+        $this->actingAs($admin)->post(route('rotations.distributeMembersOfFaculty', $rotation));
+        $saved = DB::table('course_room_rotation_user')->orderBy('user_id')->orderBy('course_id')->get();
+
+        $this->actingAs($admin)
+            ->from("/rotations/$rotation->id/show")
+            ->post(route('rotations.distributeMembersOfFaculty', $rotation))
+            ->assertRedirect("/rotations/$rotation->id/show")
+            ->assertSessionHas('warning');
+
+        $this->assertEquals($saved, DB::table('course_room_rotation_user')->orderBy('user_id')->orderBy('course_id')->get());
+    }
+
     public function test_non_admin_cannot_run_the_distribution(): void
     {
         $rotation = DistributionScenario::random(1)->build();
