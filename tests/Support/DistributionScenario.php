@@ -143,6 +143,11 @@ final class DistributionScenario
         return array_search($id, $this->userIds, true);
     }
 
+    public function roomName(int $id): string
+    {
+        return array_search($id, $this->roomIds, true);
+    }
+
     /**
      * Ranges ([min, max]) used by random(). "large" matches the size of a
      * real rotation: ~67 courses in ~660 course rooms, 28 rooms, 100+ role
