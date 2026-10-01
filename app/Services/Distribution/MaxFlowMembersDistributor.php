@@ -2,7 +2,6 @@
 
 namespace App\Services\Distribution;
 
-use App\Http\Controllers\MaxFlow\EnumPersonType;
 use App\Models\Rotation;
 use App\Services\Distribution\MaxFlow\AugmentingPathSolver;
 use App\Services\Distribution\MaxFlow\RoleNetwork;
@@ -15,13 +14,13 @@ use App\Services\Distribution\MaxFlow\SelectionState;
  * secretaries, then observers), each role's network built without the
  * members' earlier assignments.
  *
- * Produces the same assignments as LegacyMaxFlowMembersDistributor, but
- * loads the rotation once and works on sparse networks instead of issuing
- * queries inside loops and scanning V x V matrices.
+ * Reproduces the original implementation's assignments exactly (locked in
+ * by DistributionSnapshotTest) while loading the rotation once and working
+ * on sparse networks. See docs/distribution.md.
  */
 final class MaxFlowMembersDistributor implements MembersDistributor
 {
-    private const ROLES = [EnumPersonType::RoomHead, EnumPersonType::Secertary, EnumPersonType::Observer];
+    private const ROLES = [MemberRole::RoomHead, MemberRole::Secertary, MemberRole::Observer];
 
     public function distribute(Rotation $rotation): DistributionResult
     {

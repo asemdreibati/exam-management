@@ -2,7 +2,7 @@
 
 namespace App\Services\Distribution\MaxFlow;
 
-use App\Http\Controllers\MaxFlow\EnumPersonType;
+use App\Services\Distribution\MemberRole;
 
 /**
  * The flow network for one role together with the meaning of its nodes.
@@ -19,7 +19,7 @@ final class RoleNetwork
      * @param int[] $rooms room ids in node order
      */
     public function __construct(
-        public readonly EnumPersonType $role,
+        public readonly MemberRole $role,
         public readonly FlowNetwork $network,
         public readonly array $members,
         public readonly int $sameTimeCount,

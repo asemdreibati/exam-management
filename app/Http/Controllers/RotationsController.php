@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\MaxMinRoomsCapacity\Stock;
-use App\Http\Controllers\MaxFlow\EnumPersonType;
+use App\Services\Distribution\MemberRole;
 use App\Services\Distribution\DistributionWriter;
 use App\Services\Distribution\MembersDistributor;
 
@@ -87,9 +87,9 @@ public function distributeMembersOfFaculty(Rotation $rotation, MembersDistributo
 
     if (!$result->succeeded()) {
         $warnings = [
-            EnumPersonType::RoomHead->name => 'لا يوجد رؤساء قاعات كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة رؤساء قاعات جدد ',
-            EnumPersonType::Secertary->name => 'لا يوجد امناء سر كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة أمناء سر جدد ',
-            EnumPersonType::Observer->name => 'لا يوجد مراقبين كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة مراقبين ',
+            MemberRole::RoomHead->name => 'لا يوجد رؤساء قاعات كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة رؤساء قاعات جدد ',
+            MemberRole::Secertary->name => 'لا يوجد امناء سر كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة أمناء سر جدد ',
+            MemberRole::Observer->name => 'لا يوجد مراقبين كفايه للفرز من فضلك قم بتعديل تعيينات الأعضاء وإضافة مراقبين ',
         ];
         return redirect()->back()->withWarning(__($warnings[$result->unfilledRole->name]));
     }

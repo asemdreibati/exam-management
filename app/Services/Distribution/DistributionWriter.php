@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\DB;
  * Saves a distribution: every assignment, plus the members of rooms that
  * courses held around the same time share.
  *
- * Produces the same rows as LegacyDistributionWriter, working in memory
- * and inserting in bulk instead of querying and inserting row by row.
+ * Saves the same rows as the original implementation (locked in by
+ * DistributionSnapshotTest), working in memory and inserting in bulk.
  *
  * Must run inside a transaction so a failure leaves no partial result.
  */
@@ -52,7 +52,7 @@ final class DistributionWriter
      */
     private function shareStaffOfCommonRooms(Rotation $rotation): void
     {
-        // Same query and order as the legacy writer's loop.
+        // The original implementation's query: shared rooms are handled in this course order.
         $program = $rotation->coursesProgram()->get();
         $sittings = [];
         foreach ($program as $course) {

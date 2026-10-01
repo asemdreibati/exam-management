@@ -4,7 +4,7 @@ namespace App\Services\Distribution\MaxFlow;
 
 /**
  * Ford-Fulkerson with breadth-first search, including the selection
- * heuristics of App\Http\Controllers\MaxFlow\MaxFlow so that the paths
+ * heuristics of the original implementation so that the paths
  * found, and their order, are identical:
  *
  * - a member who already received an assignment is postponed once in the

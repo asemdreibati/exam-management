@@ -2,7 +2,6 @@
 
 namespace App\Services\Distribution;
 
-use App\Http\Controllers\MaxFlow\EnumPersonType;
 
 /**
  * Outcome of distributing faculty members over a rotation's exam rooms.
@@ -16,7 +15,7 @@ final class DistributionResult
         public readonly array $roomHeads,
         public readonly array $secretaries,
         public readonly array $observers,
-        public readonly ?EnumPersonType $unfilledRole,
+        public readonly ?MemberRole $unfilledRole,
     ) {
     }
 
@@ -28,7 +27,7 @@ final class DistributionResult
     /**
      * No member of the given role could be assigned, so the distribution stopped.
      */
-    public static function unfilled(EnumPersonType $role): self
+    public static function unfilled(MemberRole $role): self
     {
         return new self([], [], [], $role);
     }

@@ -5,7 +5,7 @@ namespace App\Services\Distribution\MaxFlow;
 /**
  * Heuristic state that carries over from one role's max-flow run to the
  * next within a single distribution (the legacy algorithm kept it in
- * static properties of App\Http\Controllers\MaxFlow\MaxFlow).
+ * static properties).
  */
 final class SelectionState
 {

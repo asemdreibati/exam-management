@@ -2,7 +2,7 @@
 
 namespace App\Services\Distribution\MaxFlow;
 
-use App\Http\Controllers\MaxFlow\EnumPersonType;
+use App\Services\Distribution\MemberRole;
 use App\Models\Rotation;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -91,13 +91,13 @@ final class RotationData
     /**
      * @return int[]
      */
-    public function membersOf(EnumPersonType $role): array
+    public function membersOf(MemberRole $role): array
     {
         return $this->pools[$role->name];
     }
 
     /**
-     * Member pools per role, selected exactly as App\Http\Controllers\MaxFlow\Members does.
+     * Member pools per role, selected with the original queries.
      *
      * @return array<string, int[]>
      */
@@ -123,9 +123,9 @@ final class RotationData
         )));
 
         return [
-            EnumPersonType::RoomHead->name => self::ints($roomHeads),
-            EnumPersonType::Secertary->name => self::ints($secretaries),
-            EnumPersonType::Observer->name => self::ints($observers),
+            MemberRole::RoomHead->name => self::ints($roomHeads),
+            MemberRole::Secertary->name => self::ints($secretaries),
+            MemberRole::Observer->name => self::ints($observers),
         ];
     }
 

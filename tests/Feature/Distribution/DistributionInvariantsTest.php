@@ -106,7 +106,7 @@ class DistributionInvariantsTest extends TestCase
     }
 
     /**
-     * Members eligible for each role, mirroring App\Http\Controllers\MaxFlow\Members.
+     * Members eligible for each role, as RotationData selects them.
      */
     private function pools(Rotation $rotation): array
     {

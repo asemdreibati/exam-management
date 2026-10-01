@@ -2,11 +2,11 @@
 
 namespace App\Services\Distribution\MaxFlow;
 
-use App\Http\Controllers\MaxFlow\EnumPersonType;
+use App\Services\Distribution\MemberRole;
 
 /**
- * Builds the flow network for one role, reproducing the graph that
- * App\Http\Controllers\MaxFlow\Graph builds, from preloaded data.
+ * Builds the flow network for one role, reproducing the graph the
+ * original implementation built, from preloaded data.
  *
  * Source -> member: the member's remaining quota.
  * Member -> same-time group: 1, unless the member objects to (or teaches)
@@ -25,7 +25,7 @@ final class RoleNetworkBuilder
     /**
      * @param array[] $earlierRoles assignments of the roles already distributed, in order
      */
-    public function build(EnumPersonType $role, array $earlierRoles = []): RoleNetwork
+    public function build(MemberRole $role, array $earlierRoles = []): RoleNetwork
     {
         $excluded = $this->excludedCoursesByMember($role);
         $members = array_keys($excluded);
@@ -86,7 +86,7 @@ final class RoleNetworkBuilder
      *
      * @return array<int, int[]>
      */
-    private function excludedCoursesByMember(EnumPersonType $role): array
+    private function excludedCoursesByMember(MemberRole $role): array
     {
         $excluded = [];
         foreach ($this->data->membersOf($role) as $member) {
