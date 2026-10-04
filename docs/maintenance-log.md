@@ -116,15 +116,15 @@ runs; those earlier assignments broke the rules.
    git push --force origin new
    ```
    Everyone with a clone must re-clone afterwards.
-3. **Deploy on PHP 8.1 or newer.**
+3. **Deploy on PHP 8.2 or newer** (Laravel 12; see
+   [upgrade-laravel-12.md](upgrade-laravel-12.md)).
 4. **Run `php artisan migrate`.** Existing databases already have the
    permission tables, so the restored migration is skipped.
 5. **Check one real distribution in production** (or a copy) for timing and results.
 
 ## 6. Follow-ups
 
-- **Upgrade Laravel.** Version 8 is out of support, and `composer audit`
-  reports advisories against the locked packages.
+- ~~**Upgrade Laravel.**~~ Done 2026-10-04: Laravel 12 (see below).
 - **Rooms with several observers.** The model gives exactly one person per
   role per room.
 - **Distribution behaviour** (rooms with several observers, explicit
@@ -197,3 +197,20 @@ On PHP 8.4, Laravel 8 prints deprecation notices; they don't affect the results.
   a view that does not exist; its route and Blade include were commented out.
   Removed the component, the commented lines and the package, so it doesn't
   have to be carried through the Laravel upgrade. No visible change.
+
+### 2026-10-04: upgraded to Laravel 12
+
+- Laravel 8.83 → **12.69**, PHP requirement **8.2+**. `composer audit` went from
+  78 advisories to none. Full details and deployment steps are in
+  [upgrade-laravel-12.md](upgrade-laravel-12.md).
+- Replaced `fruitcake/laravel-cors` with Laravel's built-in CORS middleware,
+  moved to Spatie Permission 6 (middleware namespace, default config, migration
+  refreshed under the same name), and Sanctum 4.
+- Passwords use the `hashed` cast instead of a mutator that always re-hashed,
+  so framework code that stores an existing hash can no longer hash it twice and
+  lock users out. A test checks that existing production hashes (bcrypt cost
+  10) still log in and survive saving the user.
+- Tests moved to PHPUnit 11 (static data providers, attributes).
+- **Operators:** run on PHP 8.2+, clear `bootstrap/cache/*.php` after deploying,
+  then `php artisan optimize:clear`. No database changes.
+

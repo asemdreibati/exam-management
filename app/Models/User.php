@@ -67,18 +67,9 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        // Hashes plain-text passwords on assignment and leaves existing hashes as they are.
+        'password' => 'hashed',
     ];
-
-    /**
-     * Always encrypt password when it is updated.
-     *
-     * @param $value
-     * @return string
-     */
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password'] = bcrypt($value);
-    }
 
     /**
      * Temporary roles that grant administrative access.

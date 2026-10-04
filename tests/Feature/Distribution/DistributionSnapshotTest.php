@@ -8,6 +8,7 @@ use App\Services\Distribution\MembersDistributor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\DistributionScenario;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -25,7 +26,7 @@ class DistributionSnapshotTest extends TestCase
 
     private const SCENARIOS = ['small' => 25, 'tight' => 200, 'large' => 1];
 
-    public function scenarios(): array
+    public static function scenarios(): array
     {
         $cases = [];
         foreach (self::SCENARIOS as $size => $count) {
@@ -37,9 +38,7 @@ class DistributionSnapshotTest extends TestCase
         return $cases;
     }
 
-    /**
-     * @dataProvider scenarios
-     */
+    #[DataProvider('scenarios')]
     public function test_distribution_matches_recorded_result(string $size, int $seed): void
     {
         $scenario = DistributionScenario::random($seed, $size);

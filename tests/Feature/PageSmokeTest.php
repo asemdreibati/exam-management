@@ -9,6 +9,7 @@ use App\Services\Distribution\MembersDistributor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\DistributionScenario;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -41,7 +42,7 @@ class PageSmokeTest extends TestCase
         $this->roomId = DB::table('course_room_rotation')->where('course_id', $this->courseId)->value('room_id');
     }
 
-    public function pages(): array
+    public static function pages(): array
     {
         return [
             'home' => ['home.index', []],
@@ -78,9 +79,7 @@ class PageSmokeTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider pages
-     */
+    #[DataProvider('pages')]
     public function test_page_renders_for_admin(string $route, array $parameters): void
     {
         $this->actingAs($this->admin)
@@ -122,6 +121,20 @@ class PageSmokeTest extends TestCase
         auth()->logout();
         $this->post(route('login.perform'), ['username' => $user->email, 'password' => 'secret-pass'])->assertRedirect();
         $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_existing_password_hash_keeps_working_after_login_and_save(): void
+    {
+        // Production hashes were made by the old mutator: bcrypt with cost 10.
+        $legacyHash = password_hash('secret-pass', PASSWORD_BCRYPT, ['cost' => 10]);
+        $user = User::factory()->create(['faculty_id' => $this->rotation->faculty_id]);
+        DB::table('users')->where('id', $user->id)->update(['password' => $legacyHash]);
+
+        $this->post(route('login.perform'), ['username' => $user->username, 'password' => 'secret-pass'])->assertRedirect();
+        $this->assertAuthenticatedAs($user);
+
+        $user->refresh()->update(['city' => 'جبلة']);
+        $this->assertSame($legacyHash, $user->fresh()->password);
     }
 
     public function test_wrong_password_is_rejected(): void

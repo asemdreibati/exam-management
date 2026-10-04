@@ -8,6 +8,7 @@ use App\Services\Distribution\MembersDistributor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\DistributionScenario;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -17,14 +18,12 @@ class DistributionInvariantsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function seeds(): array
+    public static function seeds(): array
     {
         return array_map(fn ($seed) => [$seed], range(1, 25));
     }
 
-    /**
-     * @dataProvider seeds
-     */
+    #[DataProvider('seeds')]
     public function test_random_scenario_distribution_respects_all_rules(int $seed): void
     {
         $rotation = DistributionScenario::random($seed)->build();

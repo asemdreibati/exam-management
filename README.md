@@ -79,7 +79,7 @@ A **same-time group** holds the courses on the same date whose exams overlap. Se
 
 ## 🛠️ Tech Stack
 
-- **Backend**: PHP 8.1+ / Laravel 8.
+- **Backend**: PHP 8.2+ / Laravel 12.
 - **Frontend**: Blade.
 - **Graph Algorithm**: Max-Flow with bipartite graph modeling.
 - **Data Structures**: Multi-partite graph layers.
@@ -96,4 +96,6 @@ vendor/bin/phpunit   # in-memory SQLite, no database server needed
 ```
 
 - [docs/distribution.md](docs/distribution.md): how member distribution works, its guarantees and tests, and how to change it safely.
+- [docs/upgrade-laravel-12.md](docs/upgrade-laravel-12.md): what the Laravel 8 → 12 upgrade changed and how to deploy it.
+- [docs/known-issues.md](docs/known-issues.md): limitations kept on purpose, with possible fixes.
 - [docs/maintenance-log.md](docs/maintenance-log.md): the security, correctness and performance changes made in 2026, and actions needed outside the code.
