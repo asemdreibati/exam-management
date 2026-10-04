@@ -214,3 +214,10 @@ On PHP 8.4, Laravel 8 prints deprecation notices; they don't affect the results.
 - **Operators:** run on PHP 8.2+, clear `bootstrap/cache/*.php` after deploying,
   then `php artisan optimize:clear`. No database changes.
 
+
+### 2026-10-04: controller class names match their files
+
+- `roomsController` and `rotationsController` are now `RoomsController` and
+  `RotationsController`, matching their filenames. Composer's optimized
+  autoloader skipped them with a PSR-4 warning; they only loaded because PHP
+  class names are case-insensitive. No visible change.

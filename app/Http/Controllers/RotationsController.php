@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ObservationsExport;
 use App\Exports\exportObservationsInSpecificDay;
 use App\Imports\UsersImport;
-class rotationsController extends Controller
+class RotationsController extends Controller
 {
 
 //distribute students into rooms
