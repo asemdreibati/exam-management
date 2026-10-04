@@ -62,9 +62,11 @@
                                 </td>
                                 <td><a href="{{ route('courses.index', $course->id) }}" class="btn btn-info btn-sm">Edit</a></td>
                                 <td>
-                                    {!! Form::open(['method' => 'DELETE','route' => ['courses.destroy', $course->id],'style'=>'display:inline']) !!}
-                                    {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
-                                    {!! Form::close() !!}
+                                    <form method="POST" action="{{ route('courses.destroy', $course->id) }}" style="display:inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <input type="submit" value="Delete" class="btn btn-danger btn-sm">
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach

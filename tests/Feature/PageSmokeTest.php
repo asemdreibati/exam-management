@@ -88,6 +88,17 @@ class PageSmokeTest extends TestCase
             ->assertOk();
     }
 
+    public function test_delete_buttons_post_to_the_delete_routes(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('users.index'))
+            ->assertSee('action="' . route('users.destroy', User::orderBy('id')->first()) . '"', false);
+
+        $this->actingAs($this->admin)
+            ->get(route('rotations.program.show', $this->rotation))
+            ->assertSee('action="' . route('rotations.course.delete_course_from_program', [$this->rotation, $this->courseId]) . '"', false);
+    }
+
     public function test_observations_export_downloads_a_spreadsheet(): void
     {
         $this->actingAs($this->admin)

@@ -12,19 +12,11 @@
         <div class="modal-footer">
           {{-- <button class="btn btn-primary" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal" data-bs-dismiss="modal">Open second modal</button> --}}
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          @if(!array_key_exists(2,$route_info))
-            {!! Form::open(['method' => 'DELETE',
-            'route' => [$route_info[0], $route_info[1]],
-            'style'=>'display:inline']) !!}
-            {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
-            {!! Form::close() !!}
-          @else
-            {!! Form::open(['method' => 'DELETE',
-            'route' => [$route_info[0], $route_info[1],$route_info[2]],
-            'style'=>'display:inline']) !!}
-            {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
-            {!! Form::close() !!}
-          @endif
+          <form method="POST" action="{{ route($route_info[0], array_slice($route_info, 1)) }}" style="display:inline">
+            @csrf
+            @method('DELETE')
+            <input type="submit" value="Delete" class="btn btn-danger">
+          </form>
         </div>
       </div>
     </div>

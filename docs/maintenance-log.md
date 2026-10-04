@@ -179,3 +179,14 @@ On PHP 8.4, Laravel 8 prints deprecation notices; they don't affect the results.
 - Found while listing routes: three "reset" actions delete data on a GET
   request. Added to [known-issues.md](known-issues.md).
 
+
+### 2026-10-04: removed laravelcollective/html
+
+- The package is abandoned and has no release for current Laravel. It was used
+  only for four delete forms (`layouts/partials/popUpDelete`,
+  `users/edit_user_courses`, `courses/add_user_courses`). They are now plain
+  Blade forms with `@csrf` and `@method('DELETE')`, posting to the same routes.
+- The teaching-course delete form passed its route parameters nested one level
+  too deep. The plain form passes `['user' => …, 'course' => …]` directly.
+- Covered by a new smoke test asserting the delete forms point at the delete
+  routes. No visible change for users.

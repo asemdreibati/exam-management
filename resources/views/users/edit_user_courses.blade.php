@@ -90,9 +90,11 @@
                                 })->where('faculty_id',auth()->user()->faculty->id)->get() as $course)
                                     <tr>
                                         <td>
-                                            {!! Form::open(['method' => 'DELETE','route' => ['users.destroy_user_courses',['user'=>$user,'course'=>$course]],'style'=>'display:inline']) !!}
-                                            {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm mb-3']) !!}
-                                            {!! Form::close() !!}
+                                            <form method="POST" action="{{ route('users.destroy_user_courses', ['user' => $user, 'course' => $course]) }}" style="display:inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="submit" value="Delete" class="btn btn-danger btn-sm mb-3">
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach
