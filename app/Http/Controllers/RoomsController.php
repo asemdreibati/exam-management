@@ -71,11 +71,6 @@ class roomsController extends Controller
             ->withSuccess(__('room created successfully.'));
     }
 
-    public function show(Room $room)
-    {
-        return view('rooms.show',compact('room'));
-    }
-
     /**
      * Show the form for editing the specified resource.
      *

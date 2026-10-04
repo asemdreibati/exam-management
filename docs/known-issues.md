@@ -89,5 +89,10 @@ report of which seats are missing.
   and the `Stock` helpers it calls), so some pages issue many queries.
 - **`Stock` time arithmetic** adds two `strtotime()` timestamps. That only
   works while `config/app.php` uses the `UTC` timezone.
+- **Destructive actions are GET links.** `rotations.initExamProgram`,
+  `initRoomsInAllCourses` and `initUsersObservationsInAllCourses` delete a
+  rotation's program, rooms or observations on a plain GET request, so they
+  have no CSRF protection and a crafted link opened by an admin would wipe
+  data. They should become POST/DELETE forms.
 - **Student distribution** (`RotationsController::distributeStudents`) has not
   been reviewed or tested yet.

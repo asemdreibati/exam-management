@@ -164,3 +164,18 @@ On PHP 8.4, Laravel 8 prints deprecation notices; they don't affect the results.
 - Decided: upgrade to Laravel 12 (PHP 8.2+). The SQL dumps stay in the git
   history for now; the owner will purge them (steps in section 5).
 
+### 2026-10-04: pages that crashed on Linux; page smoke tests
+
+- `RotationsController` loaded `rotations.index`, `rotations.create` and
+  `rotations.edit`, but the folder is `resources/views/Rotations`. That works
+  on case-insensitive filesystems (Windows, macOS) and crashes on Linux
+  servers. The view names now match the folder.
+- Removed the `rooms.show` route and `RoomsController::show()`: the view never
+  existed and nothing linked to it, so the route could only return an error.
+- Added `PageSmokeTest`: every page renders for an admin on a rotation with a
+  saved distribution, the observations export downloads, and login works
+  with username or email (and rejects a wrong password). It is the baseline
+  for the Laravel upgrade.
+- Found while listing routes: three "reset" actions delete data on a GET
+  request. Added to [known-issues.md](known-issues.md).
+

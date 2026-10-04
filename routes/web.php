@@ -94,7 +94,6 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
                 Route::post('/create', 'RoomsController@store')->name('rooms.store');
                 Route::get('/{room}/edit', 'RoomsController@edit')->name('rooms.edit');
                 Route::patch('/{room}/update', 'RoomsController@update')->name('rooms.update');
-                Route::get('/{room}/show', 'RoomsController@show')->name('rooms.show');
                 Route::delete('/{room}/delete', 'RoomsController@destroy')->name('rooms.destroy');
                 Route::patch('/{room}/isActive', 'RoomsController@isActive')->name('rooms.isActive');
             });

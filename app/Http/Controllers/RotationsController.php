@@ -124,7 +124,7 @@ public function distributeMembersOfFaculty(Rotation $rotation, MembersDistributo
         $count_existing_rotation=count($existing_rotation);
         $rotations = Rotation::orderBy('id','DESC')->get();
         list($all_rotations_table, $observations_number_in_latest_rotation)=Stock::calcInfoForEachRotationForSpecificuser(auth()->user());
-        return view('rotations.index', compact('rotations','count_existing_rotation','observations_number_in_latest_rotation'));
+        return view('Rotations.index', compact('rotations','count_existing_rotation','observations_number_in_latest_rotation'));
     }
     /**
      * Show the form for creating a new resource.
@@ -139,7 +139,7 @@ public function distributeMembersOfFaculty(Rotation $rotation, MembersDistributo
         $general_rotations=['الدورة الفصلية الأولى','الدورة الفصلية الثانية','الدورة الفصلية الثالثة'];
         $insertion_enabled_rotation = array_diff($general_rotations, $existing_rotation);
 
-        return view('rotations.create',compact('insertion_enabled_rotation'));
+        return view('Rotations.create',compact('insertion_enabled_rotation'));
     }
 
     /**
@@ -189,7 +189,7 @@ public function distributeMembersOfFaculty(Rotation $rotation, MembersDistributo
         // dd($rotation->coursesProgram()->wherePivot('course_id','>',1)->where('semester',1)
         // ->get()
         // ->toArray());
-        return view('rotations.edit', ['rotation' => $rotation]);
+        return view('Rotations.edit', ['rotation' => $rotation]);
     }
 
     /**
