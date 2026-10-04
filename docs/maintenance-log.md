@@ -190,3 +190,10 @@ On PHP 8.4, Laravel 8 prints deprecation notices; they don't affect the results.
   too deep. The plain form passes `['user' => …, 'course' => …]` directly.
 - Covered by a new smoke test asserting the delete forms point at the delete
   routes. No visible change for users.
+
+### 2026-10-04: removed unused Livewire
+
+- `livewire/livewire` 2 was installed for one `Search` component that rendered
+  a view that does not exist; its route and Blade include were commented out.
+  Removed the component, the commented lines and the package, so it doesn't
+  have to be carried through the Laravel upgrade. No visible change.

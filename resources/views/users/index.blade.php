@@ -50,7 +50,6 @@
         <div class="mt-2">
             @include('layouts.partials.messages')
         </div>
-        {{-- @livewire('search') --}}
         <div class="row">
             {{-- search in js --}}{{-- That is not related with controller - Only for Js --}}
             {{-- <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12">

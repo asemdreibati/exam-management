@@ -164,7 +164,3 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         });
     });
 
-
-
-//Livewires
-     //Route::get('/search', \App\Http\Livewire\Search::class)->name('search');
