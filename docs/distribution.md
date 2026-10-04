@@ -152,6 +152,8 @@ Checked on every result by `DistributionInvariantsTest`:
 
 ## Known limitations
 
+Kept as is on purpose; see [known-issues.md](known-issues.md) for details and possible fixes.
+
 - **One person per role per room.** Rooms needing more than one observer are
   not modelled.
 - **Fairness is heuristic.** Max-flow fills as many seats as possible;

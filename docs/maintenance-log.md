@@ -6,7 +6,11 @@
 
 This log records what was changed, why, and what it means for the people
 running and using the system. Each item lists its commit. For how the
-distribution works now, see [distribution.md](distribution.md).
+distribution works now, see [distribution.md](distribution.md). Known
+limitations kept on purpose are in [known-issues.md](known-issues.md).
+
+Sections 1–7 cover the first pass. Later work is added as dated entries
+under [Later entries](#later-entries).
 
 ## Summary
 
@@ -123,6 +127,9 @@ runs; those earlier assignments broke the rules.
   reports advisories against the locked packages.
 - **Rooms with several observers.** The model gives exactly one person per
   role per room.
+- **Distribution behaviour** (rooms with several observers, explicit
+  fairness, one definition of "same time"): kept as is for now by decision
+  of 2026-10-04 and documented in [known-issues.md](known-issues.md).
 - **Explicit fairness and priorities.** A single network with role phases,
   or min-cost flow, could replace the heuristics with a clear objective.
   That is a deliberate behaviour change, done by re-recording the snapshots
@@ -141,3 +148,19 @@ vendor/bin/phpunit
 
 Tests use in-memory SQLite and need no database server. 267 tests pass.
 On PHP 8.4, Laravel 8 prints deprecation notices; they don't affect the results.
+
+## Later entries
+
+### 2026-10-04: documentation rule and known issues
+
+- Added `CLAUDE.md` with the working rules for this repository. Every change
+  is documented as part of the change: a maintenance-log entry, updates to
+  the docs it affects, and a commit message that explains why.
+- Added [known-issues.md](known-issues.md). By decision, the distribution
+  behaviour stays as it is for now: one person per role per room, heuristic
+  fairness, two definitions of "same time", group-wide exclusions, and
+  "first match wins" when copying staff into shared rooms. Each item lists
+  a possible fix.
+- Decided: upgrade to Laravel 12 (PHP 8.2+). The SQL dumps stay in the git
+  history for now; the owner will purge them (steps in section 5).
+
